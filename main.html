@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Korean Photobooth (9:16)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Glass+Antiqua&family=League+Spartan:wght@100..900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+    
+    <style>
+        /* ================= CSS ================= */
+        body {
+            font-size: 24px;
+            font-family:'glass antiqua', sans-serif;
+            background-image: url('webbgstar-100.jpg');
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-attachment: fixed;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .app-logo {
+            max-width: 500px; 
+            height: auto;
+            margin-bottom: 20px;
+            filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.1)); 
+        }
+
+        .app-container {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            text-align: center;
+            /* 💡 ขยายความกว้างให้รองรับ 3 คอลัมน์ */
+            max-width: 1300px; 
+        }
+
+        /* ---------------- โซนกล้อง ---------------- */
+        #camera-section {
+            position: relative;
+            width: 640px;
+            height: 480px;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0 auto 20px auto;
+        }
+
+        #webcam {
+            width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);
+        }
+
+        .crop-guide {
+            position: absolute; left: 0; width: 100%; height: 17%; 
+            background-color: rgba(0, 0, 0, 0.6); z-index: 5; pointer-events: none;
+        }
+        #guide-top { top: 0; }
+        #guide-bottom { bottom: 0; }
+
+        #flash-effect {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: white; z-index: 100; opacity: 0; pointer-events: none;
+        }
+        .flash-animate { animation: flash_keyframes 0.5s ease-out; }
+        @keyframes flash_keyframes { 0% { opacity: 1; } 100% { opacity: 0; } }
+
+        #countdown-display {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 150px; font-weight: bold; color: white;
+            text-shadow: 0 0 20px rgba(142, 36, 170, 0.8), 0 0 40px rgba(0, 0, 0, 0.5);
+            z-index: 10; pointer-events: none; display: none;
+        }
+
+        /* ---------------- โซนตกแต่งรูป (แบ่ง 3 คอลัมน์) ---------------- */
+        #editor-layout {
+            display: none; 
+            flex-direction: row;
+            gap: 30px;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        /* ตรงกลาง: พื้นที่ Canvas สำหรับรูปถ่าย 9:16 */
+        #canvas-wrapper {
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            border: 1px solid #ddd;
+            background: #fff;
+            border-radius: 5px;
+            overflow: hidden;
+            transform: scale(0.8);
+            transform-origin: top center;
+            margin-bottom: -192px; 
+        }
+
+        /* ฝั่งซ้ายและขวา: Block เครื่องมือ (Sidebar) */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 320px; 
+            text-align: left;
+        }
+
+        .tool-block {
+            background-color: #fafafa;
+            border: 2px solid #eee;
+            border-radius: 15px;
+            padding: 20px;
+        }
+        
+        .tool-block h3 { margin-top: 0; margin-bottom: 15px; font-size: 18px; color: #333; border-bottom: 2px solid #ddd; padding-bottom: 10px;}
+
+        /* สไตล์ปุ่มและรูปภาพ Thumbnail */
+/* สไตล์ปุ่มและรูปภาพ Thumbnail (จัดให้เรียง 4 ช่องเท่ากันทั้งสองฝั่ง) */
+.frame-thumbnails { 
+            display: grid;
+            gap: 8px; 
+            justify-items: center; 
+        }
+
+        /* 1. จัดแถวให้ "กรอบรูป" (ปรับเป็น 3 ช่อง/แถว จะได้ไม่ผอมเกินไป) */
+        .tool-block > .frame-thumbnails {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        /* 2. จัดแถวให้ "สติกเกอร์" (ใช้ 4 ช่อง/แถว เหมือนเดิม) */
+        .sticker-category .frame-thumbnails {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        /* 3. รูปแบบปุ่มพื้นฐาน (ตั้งค่าให้เป็นแนวตั้ง 9:16 สำหรับกรอบรูป) */
+        .thumb-btn { 
+            width: 100%; 
+            height: auto; 
+            aspect-ratio: 9 / 16; /* 🚨 บังคับสัดส่วน 9:16 */
+            margin: 0; 
+            border: 2px solid #4f443a; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            object-fit: cover; 
+            transition: 0.2s; 
+            background: white; 
+            min-width: 0; 
+            overflow: hidden; 
+            font-size: 10px; 
+        }
+        
+        .thumb-btn:hover { 
+            border-color: #f9eaf3; 
+            transform: scale(1.05); 
+        }
+
+        /* 4. บังคับให้ปุ่ม "สติกเกอร์" กลับมาเป็นสี่เหลี่ยมจัตุรัส 1:1 */
+        .sticker-category .thumb-btn {
+            aspect-ratio: 1 / 1; /* 🚨 สติกเกอร์สัดส่วน 1:1 */
+            object-fit: contain; /* ไม่ให้สติกเกอร์โดนตัดขอบ */
+        }
+        
+        button { padding: 12px; font-size: 16px; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; transition: 0.2s; width: 100%; margin-bottom: 10px; }
+        button:disabled { background: #ccc !important; cursor: not-allowed; }
+
+        .btn-primary { background: #f9eaf3; color: #4f443a; width: auto; padding: 15px 40px; font-size: 18px; }
+        .btn-primary:hover:not(:disabled) { background: #c0a689; }
+        
+        .btn-remove { background: #ce7c90; color: white; }
+        .btn-remove:hover { background: #ffb7c9; }
+
+        .btn-success { background: #f7eeca; color: #4f443a; font-size: 18px;}
+        .btn-success:hover { background: #c0a689; }
+        .btn-retake { background: #dbc7eb; color: #4f443a; }
+        .btn-retake:hover { background: #a27cc5; }
+
+        /* --- สไตล์สำหรับแท็บหมวดหมู่สติกเกอร์ --- */
+        .category-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 15px;
+            justify-content: center;
+        }
+
+        .cat-btn {
+            padding: 6px 12px;
+            font-size: 14px;
+            background: #e0e0e0;
+            color: #4f443a;
+            border-radius: 5px; 
+            width: auto;
+            margin-bottom: 0;
+        }
+
+        .cat-btn:hover { background: #dbc7eb; color: white; }
+        .cat-btn.active { background: #dbc7eb; color: white; }
+
+        .sticker-category {
+            display: none;
+            min-height: 80px; 
+        }
+
+        button, input, textarea, select {
+            font-family: inherit;
+        }
+
+        .sticker-category .frame-thumbnails {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 8px; 
+            justify-items: center; 
+        }
+
+        .sticker-category .thumb-btn {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 1 / 1; 
+            margin: 0; 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <div id="camera-section-wrapper">
+            <div id="camera-section">
+                <div class="crop-guide" id="guide-top"></div>
+                <video id="webcam" autoplay playsinline></video>
+                <div class="crop-guide" id="guide-bottom"></div>
+                
+                <div id="flash-effect"></div>
+                <div id="countdown-display"></div>
+            </div>
+            <button class="btn-primary" id="snap-btn">📷 Take a Photo</button>
+            
+            
+        </div>
+
+        <div id="editor-layout">
+            
+<div class="sidebar">
+                <div class="tool-block">
+                    <h3>🖼️ Choose your frame</h3>
+                    <div class="frame-thumbnails">
+                        <img src="Untitleddesign (17).png" class="thumb-btn" onclick="addFrame('Untitleddesign (17).png')" alt="Frame 17">
+                        <img src="Untitleddesign (18).png" class="thumb-btn" onclick="addFrame('Untitleddesign (18).png')" alt="Frame 18">
+                        <img src="Untitleddesign (19).png" class="thumb-btn" onclick="addFrame('Untitleddesign (19).png')" alt="Frame 19">
+                        <img src="Untitleddesign (1).png" class="thumb-btn" onclick="addFrame('Untitleddesign (1).png')" alt="Frame 1">
+                        <img src="Untitleddesign (2).png" class="thumb-btn" onclick="addFrame('Untitleddesign (2).png')" alt="Frame 2">
+                        <img src="Untitleddesign (3).png" class="thumb-btn" onclick="addFrame('Untitleddesign (3).png')" alt="Frame 3">
+                        <img src="Untitleddesign (4).png" class="thumb-btn" onclick="addFrame('Untitleddesign (4).png')" alt="Frame 4">
+                        <img src="Untitleddesign (5).png" class="thumb-btn" onclick="addFrame('Untitleddesign (5).png')" alt="Frame 5">
+                        <img src="Untitleddesign (6).png" class="thumb-btn" onclick="addFrame('Untitleddesign (6).png')" alt="Frame 6">
+                        <img src="Untitleddesign (7).png" class="thumb-btn" onclick="addFrame('Untitleddesign (7).png')" alt="Frame 7">
+                        <img src="Untitleddesign (8).png" class="thumb-btn" onclick="addFrame('Untitleddesign (8).png')" alt="Frame 8">
+                        <img src="Untitleddesign (9).png" class="thumb-btn" onclick="addFrame('Untitleddesign (9).png')" alt="Frame 9">
+                        <img src="Untitleddesign (10).png" class="thumb-btn" onclick="addFrame('Untitleddesign (10).png')" alt="Frame 10">
+                        <img src="Untitleddesign (11).png" class="thumb-btn" onclick="addFrame('Untitleddesign (11).png')" alt="Frame 11">
+                        <img src="Untitleddesign (12).png" class="thumb-btn" onclick="addFrame('Untitleddesign (12).png')" alt="Frame 12">
+                        <img src="Untitleddesign (13).png" class="thumb-btn" onclick="addFrame('Untitleddesign (13).png')" alt="Frame 13">
+                        <img src="Untitleddesign (14).png" class="thumb-btn" onclick="addFrame('Untitleddesign (14).png')" alt="Frame 14">
+                        <img src="Untitleddesign (15).png" class="thumb-btn" onclick="addFrame('Untitleddesign (15).png')" alt="Frame 15">
+                        <img src="Untitleddesign (16).png" class="thumb-btn" onclick="addFrame('Untitleddesign (16).png')" alt="Frame 16">
+                        <img src="Untitleddesign (20).png" class="thumb-btn" onclick="addFrame('Untitleddesign (20).png')" alt="Frame 20">
+                    </div>
+                    <button class="btn-remove" onclick="removeFrame()" style="margin-top: 10px;">❌ Delete frame</button>
+                </div>
+            </div>
+
+            <div id="canvas-wrapper">
+                <canvas id="fabric-canvas"></canvas>
+            </div>
+
+            <div class="sidebar">
+                <div class="tool-block">
+                    <h3>✨ Let's Decorate</h3>
+                    
+                    <div class="category-tabs">
+                        <button class="cat-btn active" onclick="showCategory('cat-1', this)">✨ deco</button>
+                        <button class="cat-btn" onclick="showCategory('cat-2', this)">🎪 festival</button>
+                        <button class="cat-btn" onclick="showCategory('cat-3', this)">🐣 cmm</button>
+                        <button class="cat-btn" onclick="showCategory('cat-4', this)">🍭 sweets</button>
+                    </div>
+
+                    <div id="cat-1" class="sticker-category" style="display: block;">
+                        <div class="frame-thumbnails">
+                            <img src="heartblue.png" class="thumb-btn" onclick="addSticker('heartblue.png')" alt="heartblue">
+                            <img src="heartbrown.png" class="thumb-btn" onclick="addSticker('heartbrown.png')" alt="heartbrown">
+                            <img src="heartgreen.png" class="thumb-btn" onclick="addSticker('heartgreen.png')" alt="heartgreen">
+                            <img src="heartpink.png" class="thumb-btn" onclick="addSticker('heartpink.png')" alt="heartpink">
+                            <img src="heartpurple.png" class="thumb-btn" onclick="addSticker('heartpurple.png')" alt="heartpurple">
+                            <img src="heartyellow.png" class="thumb-btn" onclick="addSticker('heartyellow.png')" alt="heartyellow">
+                            <img src="starblue.png" class="thumb-btn" onclick="addSticker('starblue.png')" alt="starblue">
+                            <img src="starbluecheck.png" class="thumb-btn" onclick="addSticker('starbluecheck.png')" alt="starbluecheck">
+                            <img src="starpink.png" class="thumb-btn" onclick="addSticker('starpink.png')" alt="starpink">
+                            <img src="starpinkbl.png" class="thumb-btn" onclick="addSticker('starpinkbl.png')" alt="starpinkbl">
+                            <img src="starpinkcheck.png" class="thumb-btn" onclick="addSticker('starpinkcheck.png')" alt="starpinkcheck">
+                            <img src="starwhite.png" class="thumb-btn" onclick="addSticker('starwhite.png')" alt="starwhite">
+                            <img src="staryel.png" class="thumb-btn" onclick="addSticker('staryel.png')" alt="staryel">
+                            <img src="staryelbl.png" class="thumb-btn" onclick="addSticker('staryelbl.png')" alt="staryelbl">
+                            <img src="staryelcheck.png" class="thumb-btn" onclick="addSticker('staryelcheck.png')" alt="staryelcheck">
+                            <img src="staryelpink.png" class="thumb-btn" onclick="addSticker('staryelpink.png')" alt="staryelpink">
+                            <img src="Bowblue.png" class="thumb-btn" onclick="addSticker('Bowblue.png')" alt="Bowblue">
+                            <img src="Bowgreen.png" class="thumb-btn" onclick="addSticker('Bowgreen.png')" alt="Bowgreen">
+                            <img src="Bowpink.png" class="thumb-btn" onclick="addSticker('Bowpink.png')" alt="Bowpink">
+                            <img src="Winkblue.png" class="thumb-btn" onclick="addSticker('Winkblue.png')" alt="Winkblue">
+                            <img src="Winkpink.png" class="thumb-btn" onclick="addSticker('Winkpink.png')" alt="Winkpink">
+                            <img src="Winkpurplebl.png" class="thumb-btn" onclick="addSticker('Winkpurplebl.png')" alt="Winkpurplebl">
+                            <img src="Winkyellow.png" class="thumb-btn" onclick="addSticker('Winkyellow.png')" alt="Winkyellow">
+                            <img src="Winkyelpink.png" class="thumb-btn" onclick="addSticker('Winkyelpink.png')" alt="Winkyelpink">
+                            <img src="Rainbow1.png" class="thumb-btn" onclick="addSticker('Rainbow1.png')" alt="Rainbow1">
+                            <img src="Rainbow2.png" class="thumb-btn" onclick="addSticker('Rainbow2.png')" alt="Rainbow2">
+                        </div>
+                    </div>
+
+                    <div id="cat-2" class="sticker-category">
+                        <div class="frame-thumbnails">
+    <img src="Bunting1.png" class="thumb-btn" onclick="addSticker('Bunting1.png')" alt="Bunting1">
+    <img src="Bunting2.png" class="thumb-btn" onclick="addSticker('Bunting2.png')" alt="Bunting2">
+    
+    <img src="Butterflybluepink.png" class="thumb-btn" onclick="addSticker('Butterflybluepink.png')" alt="Butterflybluepink">
+    <img src="Butterflygreenyellow.png" class="thumb-btn" onclick="addSticker('Butterflygreenyellow.png')" alt="Butterflygreenyellow">
+    <img src="Butterflyorangeblue.png" class="thumb-btn" onclick="addSticker('Butterflyorangeblue.png')" alt="Butterflyorangeblue">
+    <img src="Butterflyorangeyellow.png" class="thumb-btn" onclick="addSticker('Butterflyorangeyellow.png')" alt="Butterflyorangeyellow">
+    <img src="Butterflypinkpurple.png" class="thumb-btn" onclick="addSticker('Butterflypinkpurple.png')" alt="Butterflypinkpurple">
+    <img src="Butterflypinkyellow.png" class="thumb-btn" onclick="addSticker('Butterflypinkyellow.png')" alt="Butterflypinkyellow">
+    
+    <img src="Dog balloon blue.png" class="thumb-btn" onclick="addSticker('Dog balloon blue.png')" alt="Dog balloon blue">
+    <img src="Dog balloon green.png" class="thumb-btn" onclick="addSticker('Dog balloon green.png')" alt="Dog balloon green">
+    <img src="Dog balloon orange.png" class="thumb-btn" onclick="addSticker('Dog balloon orange.png')" alt="Dog balloon orange">
+    <img src="Dog balloon pink.png" class="thumb-btn" onclick="addSticker('Dog balloon pink.png')" alt="Dog balloon pink">
+    <img src="Dog balloon red.png" class="thumb-btn" onclick="addSticker('Dog balloon red.png')" alt="Dog balloon red">
+    <img src="Dog balloon yellow.png" class="thumb-btn" onclick="addSticker('Dog balloon yellow.png')" alt="Dog balloon yellow">
+    
+    <img src="Flower blue.png" class="thumb-btn" onclick="addSticker('Flower blue.png')" alt="Flower blue">
+    <img src="Flower orange.png" class="thumb-btn" onclick="addSticker('Flower orange.png')" alt="Flower orange">
+    <img src="Flower pink.png" class="thumb-btn" onclick="addSticker('Flower pink.png')" alt="Flower pink">
+    <img src="Flower purple.png" class="thumb-btn" onclick="addSticker('Flower purple.png')" alt="Flower purple">
+    
+    <img src="heart ballon orange.png" class="thumb-btn" onclick="addSticker('heart ballon orange.png')" alt="heart ballon orange">
+    <img src="heart balloon blue.png" class="thumb-btn" onclick="addSticker('heart balloon blue.png')" alt="heart balloon blue">
+    <img src="heart balloon pink.png" class="thumb-btn" onclick="addSticker('heart balloon pink.png')" alt="heart balloon pink">
+    <img src="heart balloon purple.png" class="thumb-btn" onclick="addSticker('heart balloon purple.png')" alt="heart balloon purple">
+    <img src="heart balloon red.png" class="thumb-btn" onclick="addSticker('heart balloon red.png')" alt="heart balloon red">
+    <img src="heart balloon yellow.png" class="thumb-btn" onclick="addSticker('heart balloon yellow.png')" alt="heart balloon yellow">
+                    </div>
+                    </div>
+
+                    <div id="cat-3" class="sticker-category">
+                        <div class="frame-thumbnails">
+    <img src="Duck.png" class="thumb-btn" onclick="addSticker('Duck.png')" alt="Duck">
+    <img src="Duckboy.png" class="thumb-btn" onclick="addSticker('Duckboy.png')" alt="Duckboy">
+    <img src="Duckgirl.png" class="thumb-btn" onclick="addSticker('Duckgirl.png')" alt="Duckgirl">
+    <img src="Ducktaibangmod.png" class="thumb-btn" onclick="addSticker('Ducktaibangmod.png')" alt="Ducktaibangmod">
+    <img src="Ducktaicmm.png" class="thumb-btn" onclick="addSticker('Ducktaicmm.png')" alt="Ducktaicmm">
+    <img src="Ducktaikaru.png" class="thumb-btn" onclick="addSticker('Ducktaikaru.png')" alt="Ducktaikaru">
+    <img src="ilovecmm.png" class="thumb-btn" onclick="addSticker('ilovecmm.png')" alt="ilovecmm">
+                    </div>
+                    </div>
+
+                    <div id="cat-4" class="sticker-category">
+                        <div class="frame-thumbnails">
+    <img src="Cadypinkpurple.png" class="thumb-btn" onclick="addSticker('Cadypinkpurple.png')" alt="Cadypinkpurple">
+    <img src="Candygreenblue.png" class="thumb-btn" onclick="addSticker('Candygreenblue.png')" alt="Candygreenblue">
+    <img src="Candylinepinkblue.png" class="thumb-btn" onclick="addSticker('Candylinepinkblue.png')" alt="Candylinepinkblue">
+    <img src="Candypinkblue.png" class="thumb-btn" onclick="addSticker('Candypinkblue.png')" alt="Candypinkblue">
+    <img src="Candyyellowpink.png" class="thumb-btn" onclick="addSticker('Candyyellowpink.png')" alt="Candyyellowpink">
+    <img src="Icecream1.png" class="thumb-btn" onclick="addSticker('Icecream1.png')" alt="Icecream1">
+    <img src="Icecream2.png" class="thumb-btn" onclick="addSticker('Icecream2.png')" alt="Icecream2">
+</div>
+                    </div>
+
+                    <button class="btn-remove" onclick="deleteSelected()" style="margin-top: 15px;">🗑️ Delete selected</button>
+                </div>
+                
+                <div class="tool-block" style="background-color: transparent; border: none; padding: 0;">
+                    <button class="btn-success" id="download-btn">💾 Save image</button>
+                    <button class="btn-retake" id="retake-btn">🔄 Retake image</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // ================= JAVASCRIPT =================
+        const video = document.getElementById('webcam');
+        const cameraSectionWrapper = document.getElementById('camera-section-wrapper');
+        const editorLayout = document.getElementById('editor-layout');
+        const snapBtn = document.getElementById('snap-btn');
+        const countdownDisplay = document.getElementById('countdown-display');
+        const flashEffect = document.getElementById('flash-effect');
+
+        let canvas; 
+        let stream; 
+        let capturedPhotos = []; 
+
+        // ====================================================
+        // 🚨 ตั้งค่าระยะห่างขอบและช่องไฟของรูปถ่าย (Layout) 🚨
+        // ====================================================
+        const canvasWidth = 540;     // กว้าง (สัดส่วน 9:16)
+        const canvasHeight = 960;    // สูง (สัดส่วน 9:16)
+        const totalPhotos = 3;       // จำนวนช็อต
+
+        const padLeftRight = 25;     // ขอบซ้าย-ขวา
+        const padTop = 25;           // ขอบบน
+        const padBottom = 180;       // พื้นที่ด้านล่าง (เว้นไว้ติดสติกเกอร์เยอะๆ)
+        const gap = 15;              // ช่องว่างระหว่างรูป
+
+        // คำนวณขนาดภาพถ่ายอัตโนมัติ
+        const photoWidth = canvasWidth - (padLeftRight * 2); 
+        const totalGap = gap * (totalPhotos - 1); 
+        const photoHeight = (canvasHeight - padTop - padBottom - totalGap) / totalPhotos; 
+        // ====================================================
+
+        // --- 1. เปิดกล้อง ---
+        navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } })
+            .then(s => { stream = s; video.srcObject = stream; })
+            .catch(err => { alert("ไม่สามารถเปิดกล้องได้ รบกวนกดอนุญาตด้วยครับ!"); });
+
+        // --- 2. ฟังก์ชันเริ่มถ่ายรูป ---
+        snapBtn.addEventListener('click', () => {
+            capturedPhotos = []; 
+            snapBtn.disabled = true;
+            startCountdownForPhoto(1); 
+        });
+
+        // --- 3. ฟังก์ชันนับถอยหลัง ---
+        function startCountdownForPhoto(photoNumber) {
+            let count = 5; 
+            countdownDisplay.style.display = 'block';
+            countdownDisplay.innerText = count;
+            snapBtn.innerText = `📸 Taking Photo ${photoNumber} / ${totalPhotos}...`;
+
+            const timer = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    countdownDisplay.innerText = count;
+                } else if (count === 0) {
+                    countdownDisplay.innerText = "Cheese! 📸";
+                } else {
+                    clearInterval(timer); 
+                    countdownDisplay.style.display = 'none'; 
+                    captureSinglePhoto(); 
+
+                    if (capturedPhotos.length < totalPhotos) {
+                        setTimeout(() => { startCountdownForPhoto(capturedPhotos.length + 1); }, 1000); 
+                    } else {
+                        goToEditor(); 
+                    }
+                }
+            }, 1000);
+        }
+
+        // --- 4. ฟังก์ชันตัดภาพ (Crop) ให้พอดีกับกรอบเป๊ะๆ ---
+        function captureSinglePhoto() {
+            if(flashEffect) {
+                flashEffect.classList.add('flash-animate');
+                setTimeout(() => flashEffect.classList.remove('flash-animate'), 500);
+            }
+            
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = photoWidth; 
+            tempCanvas.height = photoHeight; 
+            const tempCtx = tempCanvas.getContext('2d');
+            
+            // สลับเป็นกระจก
+            tempCtx.translate(tempCanvas.width, 0);
+            tempCtx.scale(-1, 1);
+            
+            // คำนวณจุดตัดของภาพ
+            const targetRatio = photoWidth / photoHeight; 
+            const videoRatio = video.videoWidth / video.videoHeight;
+            let sWidth, sHeight, sx, sy;
+            
+            if (targetRatio > videoRatio) {
+                sWidth = video.videoWidth;
+                sHeight = sWidth / targetRatio;
+                sx = 0;
+                sy = (video.videoHeight - sHeight) / 2;
+            } else {
+                sHeight = video.videoHeight;
+                sWidth = sHeight * targetRatio;
+                sy = 0;
+                sx = (video.videoWidth - sWidth) / 2;
+            }
+            
+            tempCtx.drawImage(video, sx, sy, sWidth, sHeight, 0, 0, photoWidth, photoHeight);
+            capturedPhotos.push(tempCanvas.toDataURL('image/png'));
+        }
+
+        // --- 5. ฟังก์ชันจัดเรียงรูปภาพลงหน้าตกแต่ง ---
+        function goToEditor() {
+            cameraSectionWrapper.style.display = 'none';
+            editorLayout.style.display = 'flex'; 
+
+            if (!canvas) {
+                canvas = new fabric.Canvas('fabric-canvas', {
+                    width: canvasWidth,
+                    height: canvasHeight,
+                    backgroundColor: '#ffffff', // สีขอบพื้นหลัง (แก้เป็นสีอื่นได้)
+                    preserveObjectStacking: true 
+                });
+            } else {
+                canvas.clear();
+                canvas.backgroundColor = '#ffffff';
+                currentFrameObj = null; 
+            }
+
+            // จัดเรียงรูปภาพตามพิกัดที่คำนวณไว้
+            let loadedImages = 0;
+            capturedPhotos.forEach((photoDataUrl, index) => {
+                fabric.Image.fromURL(photoDataUrl, function(img) {
+                    img.set({ 
+                        left: padLeftRight, 
+                        top: padTop + (index * (photoHeight + gap)), 
+                        selectable: false, evented: false 
+                    });
+                    
+                    canvas.add(img);
+                    img.sendToBack(); 
+                    
+                    loadedImages++;
+                    if (loadedImages === totalPhotos) canvas.renderAll();
+                });
+            });
+
+            snapBtn.disabled = false;
+            snapBtn.innerText = "📷 เริ่มถ่ายรูป (3 ช็อต)";
+        }
+
+        // --- 6. ฟังก์ชันจัดการกรอบรูป (อยู่ชั้นกลาง) ---
+        let currentFrameObj = null; 
+        function addFrame(url) {
+            fabric.Image.fromURL(url, function(img) {
+                if (!img) { alert("หาไฟล์รูปกรอบไม่เจอครับ!"); return; }
+                if (currentFrameObj) canvas.remove(currentFrameObj);
+
+                img.set({
+                    left: 0, top: 0,
+                    scaleX: canvas.width / img.width, 
+                    scaleY: canvas.height / img.height,
+                    selectable: false, evented: false 
+                });
+                
+                canvas.add(img);
+                img.moveTo(totalPhotos); // ดันไปไว้เหนือรูปถ่าย
+                currentFrameObj = img;
+                canvas.renderAll();
+            }, { crossOrigin: 'anonymous' });
+        }
+
+        function removeFrame() { 
+            if (currentFrameObj) {
+                canvas.remove(currentFrameObj);
+                currentFrameObj = null;
+                canvas.renderAll();
+            }
+        }
+
+        // --- 7. ฟังก์ชันจัดการสติกเกอร์ (อยู่บนสุด) ---
+function addSticker(url) {
+    fabric.Image.fromURL(url, function(img) {
+        img.set({
+            // ❌ ลบ left: 200, และ top: canvasHeight - 120 ออก
+            scaleX: 0.25, scaleY: 0.25, // ยังคงย่อขนาดสติกเกอร์ลง
+            transparentCorners: false, cornerColor: '#dbc7eb', borderColor: '#ffffff', cornerSize: 12, padding: 5, cornerStyle: 'circle'
+        });
+        canvas.add(img);
+        img.bringToFront(); // ยังคงอยู่บนสุด
+        img.center(); // 🚨 NEW: จับสติกเกอร์มาวางตรงกลางภาพทันที
+        canvas.setActiveObject(img); // ยังคงเลือกให้ผู้ใช้
+    }, { crossOrigin: 'anonymous' });
+}
+
+        function deleteSelected() { 
+            const activeObject = canvas.getActiveObject(); 
+            if (activeObject) canvas.remove(activeObject); 
+        }
+
+        window.addEventListener('keydown', (e) => { 
+            if (e.key === 'Delete' || e.key === 'Backspace') deleteSelected(); 
+        });
+
+        // --- 8. ฟังก์ชันสลับหมวดหมู่สติกเกอร์ (Tabs) ---
+        function showCategory(categoryId, btnElement) {
+            const categories = document.querySelectorAll('.sticker-category');
+            categories.forEach(cat => cat.style.display = 'none');
+
+            const buttons = document.querySelectorAll('.cat-btn');
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(categoryId).style.display = 'block';
+            btnElement.classList.add('active');
+        }
+
+        // --- 9. ฟังก์ชันดาวน์โหลด (ความละเอียด 1080x1920) ---
+        document.getElementById('download-btn').addEventListener('click', () => {
+            canvas.discardActiveObject(); 
+            canvas.renderAll();
+            
+            // คูณ 2 จาก 540x960 จะได้ภาพเซฟขนาด 1080x1920
+            const dataURL = canvas.toDataURL({ format: 'png', quality: 1, multiplier: 2 });
+            const link = document.createElement('a');
+            link.download = 'my-korean-photobooth.png';
+            link.href = dataURL;
+            link.click();
+        });
+
+        // --- 10. ถ่ายใหม่ ---
+        document.getElementById('retake-btn').addEventListener('click', () => {
+            editorLayout.style.display = 'none';
+            cameraSectionWrapper.style.display = 'block';
+        });
+    </script>
+</body>
+</html>

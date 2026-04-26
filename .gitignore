@@ -1,0 +1,10 @@
+# Folders
+scratch/
+.gemini/
+node_modules/
+
+# Files
+*.py
+*.txt
+.DS_Store
+Thumbs.db

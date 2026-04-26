@@ -1,20 +1,22 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Korean Photobooth (9:16)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Glass+Antiqua&family=League+Spartan:wght@100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Glass+Antiqua&family=League+Spartan:wght@100..900&display=swap"
+        rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
-    
+
     <style>
         /* ================= CSS ================= */
         body {
             font-size: 24px;
-            font-family:'glass antiqua', sans-serif;
-            background-image: url('webbgstar-100.jpg');
+            font-family: 'glass antiqua', sans-serif;
+            background-image: url('ui/webbgstar-100.jpg');
             background-size: cover;
             background-repeat: no-repeat;
             background-position: center center;
@@ -28,20 +30,20 @@
         }
 
         .app-logo {
-            max-width: 500px; 
+            max-width: 500px;
             height: auto;
             margin-bottom: 20px;
-            filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.1)); 
+            filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.1));
         }
 
         .app-container {
             background: white;
             padding: 30px;
             border-radius: 20px;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
             text-align: center;
             /* 💡 ขยายความกว้างให้รองรับ 3 คอลัมน์ */
-            max-width: 1300px; 
+            max-width: 1300px;
         }
 
         /* ---------------- โซนกล้อง ---------------- */
@@ -56,33 +58,73 @@
         }
 
         #webcam {
-            width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1);
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transform: scaleX(-1);
         }
 
         .crop-guide {
-            position: absolute; left: 0; width: 100%; height: 17%; 
-            background-color: rgba(0, 0, 0, 0.6); z-index: 5; pointer-events: none;
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 17%;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: 5;
+            pointer-events: none;
         }
-        #guide-top { top: 0; }
-        #guide-bottom { bottom: 0; }
+
+        #guide-top {
+            top: 0;
+        }
+
+        #guide-bottom {
+            bottom: 0;
+        }
 
         #flash-effect {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: white; z-index: 100; opacity: 0; pointer-events: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
         }
-        .flash-animate { animation: flash_keyframes 0.5s ease-out; }
-        @keyframes flash_keyframes { 0% { opacity: 1; } 100% { opacity: 0; } }
+
+        .flash-animate {
+            animation: flash_keyframes 0.5s ease-out;
+        }
+
+        @keyframes flash_keyframes {
+            0% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
 
         #countdown-display {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            font-size: 150px; font-weight: bold; color: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 150px;
+            font-weight: bold;
+            color: white;
             text-shadow: 0 0 20px rgba(142, 36, 170, 0.8), 0 0 40px rgba(0, 0, 0, 0.5);
-            z-index: 10; pointer-events: none; display: none;
+            z-index: 10;
+            pointer-events: none;
+            display: none;
         }
 
         /* ---------------- โซนตกแต่งรูป (แบ่ง 3 คอลัมน์) ---------------- */
         #editor-layout {
-            display: none; 
+            display: none;
             flex-direction: row;
             gap: 30px;
             align-items: flex-start;
@@ -91,14 +133,14 @@
 
         /* ตรงกลาง: พื้นที่ Canvas สำหรับรูปถ่าย 9:16 */
         #canvas-wrapper {
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
             border: 1px solid #ddd;
             background: #fff;
             border-radius: 5px;
             overflow: hidden;
             transform: scale(0.8);
             transform-origin: top center;
-            margin-bottom: -192px; 
+            margin-bottom: -192px;
         }
 
         /* ฝั่งซ้ายและขวา: Block เครื่องมือ (Sidebar) */
@@ -106,7 +148,7 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
-            width: 320px; 
+            width: 320px;
             text-align: left;
         }
 
@@ -116,19 +158,26 @@
             border-radius: 15px;
             padding: 20px;
         }
-        
-        .tool-block h3 { margin-top: 0; margin-bottom: 15px; font-size: 18px; color: #333; border-bottom: 2px solid #ddd; padding-bottom: 10px;}
+
+        .tool-block h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 18px;
+            color: #333;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+        }
 
         /* สไตล์ปุ่มและรูปภาพ Thumbnail */
-/* สไตล์ปุ่มและรูปภาพ Thumbnail (จัดให้เรียง 4 ช่องเท่ากันทั้งสองฝั่ง) */
-.frame-thumbnails { 
+        /* สไตล์ปุ่มและรูปภาพ Thumbnail (จัดให้เรียง 4 ช่องเท่ากันทั้งสองฝั่ง) */
+        .frame-thumbnails {
             display: grid;
-            gap: 8px; 
-            justify-items: center; 
+            gap: 8px;
+            justify-items: center;
         }
 
         /* 1. จัดแถวให้ "กรอบรูป" (ปรับเป็น 3 ช่อง/แถว จะได้ไม่ผอมเกินไป) */
-        .tool-block > .frame-thumbnails {
+        .tool-block>.frame-thumbnails {
             grid-template-columns: repeat(4, 1fr);
         }
 
@@ -138,46 +187,92 @@
         }
 
         /* 3. รูปแบบปุ่มพื้นฐาน (ตั้งค่าให้เป็นแนวตั้ง 9:16 สำหรับกรอบรูป) */
-        .thumb-btn { 
-            width: 100%; 
-            height: auto; 
-            aspect-ratio: 9 / 16; /* 🚨 บังคับสัดส่วน 9:16 */
-            margin: 0; 
-            border: 2px solid #4f443a; 
-            border-radius: 10px; 
-            cursor: pointer; 
-            object-fit: cover; 
-            transition: 0.2s; 
-            background: white; 
-            min-width: 0; 
-            overflow: hidden; 
-            font-size: 10px; 
+        .thumb-btn {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 9 / 16;
+            /* 🚨 บังคับสัดส่วน 9:16 */
+            margin: 0;
+            border: 2px solid #4f443a;
+            border-radius: 10px;
+            cursor: pointer;
+            object-fit: cover;
+            transition: 0.2s;
+            background: white;
+            min-width: 0;
+            overflow: hidden;
+            font-size: 10px;
         }
-        
-        .thumb-btn:hover { 
-            border-color: #f9eaf3; 
-            transform: scale(1.05); 
+
+        .thumb-btn:hover {
+            border-color: #f9eaf3;
+            transform: scale(1.05);
         }
 
         /* 4. บังคับให้ปุ่ม "สติกเกอร์" กลับมาเป็นสี่เหลี่ยมจัตุรัส 1:1 */
         .sticker-category .thumb-btn {
-            aspect-ratio: 1 / 1; /* 🚨 สติกเกอร์สัดส่วน 1:1 */
-            object-fit: contain; /* ไม่ให้สติกเกอร์โดนตัดขอบ */
+            aspect-ratio: 1 / 1;
+            /* 🚨 สติกเกอร์สัดส่วน 1:1 */
+            object-fit: contain;
+            /* ไม่ให้สติกเกอร์โดนตัดขอบ */
         }
-        
-        button { padding: 12px; font-size: 16px; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; transition: 0.2s; width: 100%; margin-bottom: 10px; }
-        button:disabled { background: #ccc !important; cursor: not-allowed; }
 
-        .btn-primary { background: #f9eaf3; color: #4f443a; width: auto; padding: 15px 40px; font-size: 18px; }
-        .btn-primary:hover:not(:disabled) { background: #c0a689; }
-        
-        .btn-remove { background: #ce7c90; color: white; }
-        .btn-remove:hover { background: #ffb7c9; }
+        button {
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            width: 100%;
+            margin-bottom: 10px;
+        }
 
-        .btn-success { background: #f7eeca; color: #4f443a; font-size: 18px;}
-        .btn-success:hover { background: #c0a689; }
-        .btn-retake { background: #dbc7eb; color: #4f443a; }
-        .btn-retake:hover { background: #a27cc5; }
+        button:disabled {
+            background: #ccc !important;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: #f9eaf3;
+            color: #4f443a;
+            width: auto;
+            padding: 15px 40px;
+            font-size: 18px;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #c0a689;
+        }
+
+        .btn-remove {
+            background: #ce7c90;
+            color: white;
+        }
+
+        .btn-remove:hover {
+            background: #ffb7c9;
+        }
+
+        .btn-success {
+            background: #f7eeca;
+            color: #4f443a;
+            font-size: 18px;
+        }
+
+        .btn-success:hover {
+            background: #c0a689;
+        }
+
+        .btn-retake {
+            background: #dbc7eb;
+            color: #4f443a;
+        }
+
+        .btn-retake:hover {
+            background: #a27cc5;
+        }
 
         /* --- สไตล์สำหรับแท็บหมวดหมู่สติกเกอร์ --- */
         .category-tabs {
@@ -193,82 +288,204 @@
             font-size: 14px;
             background: #e0e0e0;
             color: #4f443a;
-            border-radius: 5px; 
+            border-radius: 5px;
             width: auto;
             margin-bottom: 0;
         }
 
-        .cat-btn:hover { background: #dbc7eb; color: white; }
-        .cat-btn.active { background: #dbc7eb; color: white; }
+        .cat-btn:hover {
+            background: #dbc7eb;
+            color: white;
+        }
+
+        .cat-btn.active {
+            background: #dbc7eb;
+            color: white;
+        }
 
         .sticker-category {
             display: none;
-            min-height: 80px; 
+            min-height: 80px;
         }
 
-        button, input, textarea, select {
+        button,
+        input,
+        textarea,
+        select {
             font-family: inherit;
         }
 
         .sticker-category .frame-thumbnails {
             display: grid;
-            grid-template-columns: repeat(4, 1fr); 
-            gap: 8px; 
-            justify-items: center; 
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            justify-items: center;
         }
 
         .sticker-category .thumb-btn {
             width: 100%;
             height: auto;
-            aspect-ratio: 1 / 1; 
-            margin: 0; 
+            aspect-ratio: 1 / 1;
+            margin: 0;
+        }
+
+        /* --- QR Modal Style --- */
+        #qr-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .qr-card {
+            background: white;
+            padding: 40px;
+            border-radius: 30px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 85%;
+            transform: scale(1);
+            transition: 0.3s;
+        }
+
+        .qr-card h2 {
+            margin: 0 0 10px;
+            color: #4f443a;
+            font-size: 28px;
+        }
+
+        .qr-card p {
+            color: #888;
+            font-size: 16px;
+            margin-bottom: 25px;
+        }
+
+        #qr-display {
+            background: #fafafa;
+            padding: 20px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 25px;
+            border: 1px solid #eee;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #dbc7eb;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .btn-qr-get {
+            background: #dbc7eb;
+            color: #4f443a;
+            margin-top: 5px;
+        }
+
+        .btn-qr-get:hover {
+            background: #a27cc5;
+            color: white;
         }
     </style>
 </head>
+
 <body>
 
     <div class="app-container">
-        
+
         <div id="camera-section-wrapper">
             <div id="camera-section">
                 <div class="crop-guide" id="guide-top"></div>
                 <video id="webcam" autoplay playsinline></video>
                 <div class="crop-guide" id="guide-bottom"></div>
-                
+
                 <div id="flash-effect"></div>
                 <div id="countdown-display"></div>
             </div>
             <button class="btn-primary" id="snap-btn">📷 Take a Photo</button>
-            
-            
+
+
         </div>
 
         <div id="editor-layout">
-            
-<div class="sidebar">
+
+            <div class="sidebar">
                 <div class="tool-block">
                     <h3>🖼️ Choose your frame</h3>
                     <div class="frame-thumbnails">
-                        <img src="Untitleddesign (17).png" class="thumb-btn" onclick="addFrame('Untitleddesign (17).png')" alt="Frame 17">
-                        <img src="Untitleddesign (18).png" class="thumb-btn" onclick="addFrame('Untitleddesign (18).png')" alt="Frame 18">
-                        <img src="Untitleddesign (19).png" class="thumb-btn" onclick="addFrame('Untitleddesign (19).png')" alt="Frame 19">
-                        <img src="Untitleddesign (1).png" class="thumb-btn" onclick="addFrame('Untitleddesign (1).png')" alt="Frame 1">
-                        <img src="Untitleddesign (2).png" class="thumb-btn" onclick="addFrame('Untitleddesign (2).png')" alt="Frame 2">
-                        <img src="Untitleddesign (3).png" class="thumb-btn" onclick="addFrame('Untitleddesign (3).png')" alt="Frame 3">
-                        <img src="Untitleddesign (4).png" class="thumb-btn" onclick="addFrame('Untitleddesign (4).png')" alt="Frame 4">
-                        <img src="Untitleddesign (5).png" class="thumb-btn" onclick="addFrame('Untitleddesign (5).png')" alt="Frame 5">
-                        <img src="Untitleddesign (6).png" class="thumb-btn" onclick="addFrame('Untitleddesign (6).png')" alt="Frame 6">
-                        <img src="Untitleddesign (7).png" class="thumb-btn" onclick="addFrame('Untitleddesign (7).png')" alt="Frame 7">
-                        <img src="Untitleddesign (8).png" class="thumb-btn" onclick="addFrame('Untitleddesign (8).png')" alt="Frame 8">
-                        <img src="Untitleddesign (9).png" class="thumb-btn" onclick="addFrame('Untitleddesign (9).png')" alt="Frame 9">
-                        <img src="Untitleddesign (10).png" class="thumb-btn" onclick="addFrame('Untitleddesign (10).png')" alt="Frame 10">
-                        <img src="Untitleddesign (11).png" class="thumb-btn" onclick="addFrame('Untitleddesign (11).png')" alt="Frame 11">
-                        <img src="Untitleddesign (12).png" class="thumb-btn" onclick="addFrame('Untitleddesign (12).png')" alt="Frame 12">
-                        <img src="Untitleddesign (13).png" class="thumb-btn" onclick="addFrame('Untitleddesign (13).png')" alt="Frame 13">
-                        <img src="Untitleddesign (14).png" class="thumb-btn" onclick="addFrame('Untitleddesign (14).png')" alt="Frame 14">
-                        <img src="Untitleddesign (15).png" class="thumb-btn" onclick="addFrame('Untitleddesign (15).png')" alt="Frame 15">
-                        <img src="Untitleddesign (16).png" class="thumb-btn" onclick="addFrame('Untitleddesign (16).png')" alt="Frame 16">
-                        <img src="Untitleddesign (20).png" class="thumb-btn" onclick="addFrame('Untitleddesign (20).png')" alt="Frame 20">
+                        <img src="frames/Untitleddesign (17).png" class="thumb-btn"
+                            onclick="addFrame('frames/Untitleddesign (17).png')" alt="Frame 17">
+                        <img src="frames/Untitleddesign (18).png" class="thumb-btn"
+                            onclick="addFrame('frames/Untitleddesign (18).png')" alt="Frame 18">
+                        <img src="frames/Untitleddesign (19).png" class="thumb-btn"
+                            onclick="addFrame('frames/Untitleddesign (19).png')" alt="Frame 19">
+                        <img src="frames/Untitleddesign (1).png" class="thumb-btn"
+                            onclick="addFrame('frames/Untitleddesign (1).png')" alt="Frame 1">
+                        <img src="frames/Untitleddesign (2).png" class="thumb-btn"
+                            onclick="addFrame('frames/Untitleddesign (2).png')" alt="Frame 2">
+                        <img src="frames/Untitleddesign (3).png" class="thumb-btn"
+                            onclick="addFrame('frames/Untitleddesign (3).png')" alt="Frame 3">
+                        <img src="frames/Untitleddesign (4).png" class="thumb-btn"
+                            onclick="addFrame('frames/Untitleddesign (4).png')" alt="Frame 4">
+                        <img src="frames/Untitleddesign (5).png" class="thumb-btn"
+                            onclick="addFrame('frames/Untitleddesign (5).png')" alt="Frame 5">
+                        <img src="frames/Untitleddesign (6).png" class="thumb-btn"
+                            onclick="addFrame('frames/Untitleddesign (6).png')" alt="Frame 6">
+                        <img src="frames/Untitleddesign (7).png" class="thumb-btn"
+                            onclick="addFrame('frames/Untitleddesign (7).png')" alt="Frame 7">
+                        <img src="frames/Untitleddesign (8).png" class="thumb-btn"
+                            onclick="addFrame('frames/Untitleddesign (8).png')" alt="Frame 8">
+                        <img src="frames/Untitleddesign (9).png" class="thumb-btn"
+                            onclick="addFrame('frames/Untitleddesign (9).png')" alt="Frame 9">
+                        <img src="frames/Untitleddesign (10).png" class="thumb-btn"
+                            onclick="addFrame('frames/Untitleddesign (10).png')" alt="Frame 10">
+                        <img src="frames/Untitleddesign (11).png" class="thumb-btn"
+                            onclick="addFrame('frames/Untitleddesign (11).png')" alt="Frame 11">
+                        <img src="frames/Untitleddesign (12).png" class="thumb-btn"
+                            onclick="addFrame('frames/Untitleddesign (12).png')" alt="Frame 12">
+                        <img src="frames/Untitleddesign (13).png" class="thumb-btn"
+                            onclick="addFrame('frames/Untitleddesign (13).png')" alt="Frame 13">
+                        <img src="frames/Untitleddesign (14).png" class="thumb-btn"
+                            onclick="addFrame('frames/Untitleddesign (14).png')" alt="Frame 14">
+                        <img src="frames/Untitleddesign (15).png" class="thumb-btn"
+                            onclick="addFrame('frames/Untitleddesign (15).png')" alt="Frame 15">
+                        <img src="frames/Untitleddesign (16).png" class="thumb-btn"
+                            onclick="addFrame('frames/Untitleddesign (16).png')" alt="Frame 16">
+                        <img src="frames/Untitleddesign (20).png" class="thumb-btn"
+                            onclick="addFrame('frames/Untitleddesign (20).png')" alt="Frame 20">
                     </div>
                     <button class="btn-remove" onclick="removeFrame()" style="margin-top: 10px;">❌ Delete frame</button>
                 </div>
@@ -281,7 +498,7 @@
             <div class="sidebar">
                 <div class="tool-block">
                     <h3>✨ Let's Decorate</h3>
-                    
+
                     <div class="category-tabs">
                         <button class="cat-btn active" onclick="showCategory('cat-1', this)">✨ deco</button>
                         <button class="cat-btn" onclick="showCategory('cat-2', this)">🎪 festival</button>
@@ -291,101 +508,198 @@
 
                     <div id="cat-1" class="sticker-category" style="display: block;">
                         <div class="frame-thumbnails">
-                            <img src="heartblue.PNG" class="thumb-btn" onclick="addSticker('heartblue.PNG')" alt="heartblue">
-                            <img src="heartbrown.PNG" class="thumb-btn" onclick="addSticker('heartbrown.PNG')" alt="heartbrown">
-                            <img src="heartgreen.PNG" class="thumb-btn" onclick="addSticker('heartgreen.PNG')" alt="heartgreen">
-                            <img src="heartpink.PNG" class="thumb-btn" onclick="addSticker('heartpink.PNG')" alt="heartpink">
-                            <img src="heartpurple.PNG" class="thumb-btn" onclick="addSticker('heartpurple.PNG')" alt="heartpurple">
-                            <img src="heartyellow.PNG" class="thumb-btn" onclick="addSticker('heartyellow.PNG')" alt="heartyellow">
-                            <img src="starblue.PNG" class="thumb-btn" onclick="addSticker('starblue.PNG')" alt="starblue">
-                            <img src="starbluecheck.PNG" class="thumb-btn" onclick="addSticker('starbluecheck.PNG')" alt="starbluecheck">
-                            <img src="starpink.PNG" class="thumb-btn" onclick="addSticker('starpink.PNG')" alt="starpink">
-                            <img src="starpinkbl.PNG" class="thumb-btn" onclick="addSticker('starpinkbl.PNG')" alt="starpinkbl">
-                            <img src="starpinkcheck.PNG" class="thumb-btn" onclick="addSticker('starpinkcheck.PNG')" alt="starpinkcheck">
-                            <img src="starwhite.PNG" class="thumb-btn" onclick="addSticker('starwhite.PNG')" alt="starwhite">
-                            <img src="staryel.PNG" class="thumb-btn" onclick="addSticker('staryel.PNG')" alt="staryel">
-                            <img src="staryelbl.PNG" class="thumb-btn" onclick="addSticker('staryelbl.PNG')" alt="staryelbl">
-                            <img src="staryelcheck.PNG" class="thumb-btn" onclick="addSticker('staryelcheck.PNG')" alt="staryelcheck">
-                            <img src="staryelpink.PNG" class="thumb-btn" onclick="addSticker('staryelpink.PNG')" alt="staryelpink">
-                            <img src="Bowblue.PNG" class="thumb-btn" onclick="addSticker('Bowblue.PNG')" alt="Bowblue">
-                            <img src="Bowgreen.PNG" class="thumb-btn" onclick="addSticker('Bowgreen.PNG')" alt="Bowgreen">
-                            <img src="Bowpink.PNG" class="thumb-btn" onclick="addSticker('Bowpink.PNG')" alt="Bowpink">
-                            <img src="Winkblue.PNG" class="thumb-btn" onclick="addSticker('Winkblue.PNG')" alt="Winkblue">
-                            <img src="Winkpink.PNG" class="thumb-btn" onclick="addSticker('Winkpink.PNG')" alt="Winkpink">
-                            <img src="Winkpurplebl.PNG" class="thumb-btn" onclick="addSticker('Winkpurplebl.PNG')" alt="Winkpurplebl">
-                            <img src="Winkyellow.PNG" class="thumb-btn" onclick="addSticker('Winkyellow.PNG')" alt="Winkyellow">
-                            <img src="Winkyelpink.PNG" class="thumb-btn" onclick="addSticker('Winkyelpink.PNG')" alt="Winkyelpink">
-                            <img src="Rainbow1.PNG" class="thumb-btn" onclick="addSticker('Rainbow1.PNG')" alt="Rainbow1">
-                            <img src="Rainbow2.PNG" class="thumb-btn" onclick="addSticker('Rainbow2.PNG')" alt="Rainbow2">
+                            <img src="stickers/deco/heartblue.PNG" class="thumb-btn"
+                                onclick="addSticker('stickers/deco/heartblue.PNG')" alt="heartblue">
+                            <img src="stickers/deco/heartbrown.PNG" class="thumb-btn"
+                                onclick="addSticker('stickers/deco/heartbrown.PNG')" alt="heartbrown">
+                            <img src="stickers/deco/heartgreen.PNG" class="thumb-btn"
+                                onclick="addSticker('stickers/deco/heartgreen.PNG')" alt="heartgreen">
+                            <img src="stickers/deco/heartpink.PNG" class="thumb-btn"
+                                onclick="addSticker('stickers/deco/heartpink.PNG')" alt="heartpink">
+                            <img src="stickers/deco/heartpurple.PNG" class="thumb-btn"
+                                onclick="addSticker('stickers/deco/heartpurple.PNG')" alt="heartpurple">
+                            <img src="stickers/deco/heartyellow.PNG" class="thumb-btn"
+                                onclick="addSticker('stickers/deco/heartyellow.PNG')" alt="heartyellow">
+                            <img src="stickers/deco/starblue.PNG" class="thumb-btn"
+                                onclick="addSticker('stickers/deco/starblue.PNG')" alt="starblue">
+                            <img src="stickers/deco/starbluecheck.PNG" class="thumb-btn"
+                                onclick="addSticker('stickers/deco/starbluecheck.PNG')" alt="starbluecheck">
+                            <img src="stickers/deco/starpink.PNG" class="thumb-btn"
+                                onclick="addSticker('stickers/deco/starpink.PNG')" alt="starpink">
+                            <img src="stickers/deco/starpinkbl.PNG" class="thumb-btn"
+                                onclick="addSticker('stickers/deco/starpinkbl.PNG')" alt="starpinkbl">
+                            <img src="stickers/deco/starpinkcheck.PNG" class="thumb-btn"
+                                onclick="addSticker('stickers/deco/starpinkcheck.PNG')" alt="starpinkcheck">
+                            <img src="stickers/deco/starwhite.PNG" class="thumb-btn"
+                                onclick="addSticker('stickers/deco/starwhite.PNG')" alt="starwhite">
+                            <img src="stickers/deco/staryel.PNG" class="thumb-btn"
+                                onclick="addSticker('stickers/deco/staryel.PNG')" alt="staryel">
+                            <img src="stickers/deco/staryelbl.PNG" class="thumb-btn"
+                                onclick="addSticker('stickers/deco/staryelbl.PNG')" alt="staryelbl">
+                            <img src="stickers/deco/staryelcheck.PNG" class="thumb-btn"
+                                onclick="addSticker('stickers/deco/staryelcheck.PNG')" alt="staryelcheck">
+                            <img src="stickers/deco/staryelpink.PNG" class="thumb-btn"
+                                onclick="addSticker('stickers/deco/staryelpink.PNG')" alt="staryelpink">
+                            <img src="stickers/deco/Bowblue.PNG" class="thumb-btn"
+                                onclick="addSticker('stickers/deco/Bowblue.PNG')" alt="Bowblue">
+                            <img src="stickers/deco/Bowgreen.PNG" class="thumb-btn"
+                                onclick="addSticker('stickers/deco/Bowgreen.PNG')" alt="Bowgreen">
+                            <img src="stickers/deco/Bowpink.PNG" class="thumb-btn"
+                                onclick="addSticker('stickers/deco/Bowpink.PNG')" alt="Bowpink">
+                            <img src="stickers/deco/Winkblue.PNG" class="thumb-btn"
+                                onclick="addSticker('stickers/deco/Winkblue.PNG')" alt="Winkblue">
+                            <img src="stickers/deco/Winkpink.PNG" class="thumb-btn"
+                                onclick="addSticker('stickers/deco/Winkpink.PNG')" alt="Winkpink">
+                            <img src="stickers/deco/Winkpurplebl.PNG" class="thumb-btn"
+                                onclick="addSticker('stickers/deco/Winkpurplebl.PNG')" alt="Winkpurplebl">
+                            <img src="stickers/deco/Winkyellow.PNG" class="thumb-btn"
+                                onclick="addSticker('stickers/deco/Winkyellow.PNG')" alt="Winkyellow">
+                            <img src="stickers/deco/Winkyelpink.PNG" class="thumb-btn"
+                                onclick="addSticker('stickers/deco/Winkyelpink.PNG')" alt="Winkyelpink">
+                            <img src="stickers/deco/Rainbow1.PNG" class="thumb-btn"
+                                onclick="addSticker('stickers/deco/Rainbow1.PNG')" alt="Rainbow1">
+                            <img src="stickers/deco/Rainbow2.PNG" class="thumb-btn"
+                                onclick="addSticker('stickers/deco/Rainbow2.PNG')" alt="Rainbow2">
                         </div>
                     </div>
 
                     <div id="cat-2" class="sticker-category">
                         <div class="frame-thumbnails">
-    <img src="Bunting1.png" class="thumb-btn" onclick="addSticker('Bunting1.png')" alt="Bunting1">
-    <img src="Bunting2.png" class="thumb-btn" onclick="addSticker('Bunting2.png')" alt="Bunting2">
-    
-    <img src="Butterflybluepink.png" class="thumb-btn" onclick="addSticker('Butterflybluepink.png')" alt="Butterflybluepink">
-    <img src="Butterflygreenyellow.png" class="thumb-btn" onclick="addSticker('Butterflygreenyellow.png')" alt="Butterflygreenyellow">
-    <img src="Butterflyorangeblue.png" class="thumb-btn" onclick="addSticker('Butterflyorangeblue.png')" alt="Butterflyorangeblue">
-    <img src="Butterflyorangeyellow.png" class="thumb-btn" onclick="addSticker('Butterflyorangeyellow.png')" alt="Butterflyorangeyellow">
-    <img src="Butterflypinkpurple.png" class="thumb-btn" onclick="addSticker('Butterflypinkpurple.png')" alt="Butterflypinkpurple">
-    <img src="Butterflypinkyellow.png" class="thumb-btn" onclick="addSticker('Butterflypinkyellow.png')" alt="Butterflypinkyellow">
-    
-    <img src="Dog balloon blue.png" class="thumb-btn" onclick="addSticker('Dog balloon blue.png')" alt="Dog balloon blue">
-    <img src="Dog balloon green.png" class="thumb-btn" onclick="addSticker('Dog balloon green.png')" alt="Dog balloon green">
-    <img src="Dog balloon orange.png" class="thumb-btn" onclick="addSticker('Dog balloon orange.png')" alt="Dog balloon orange">
-    <img src="Dog balloon pink.png" class="thumb-btn" onclick="addSticker('Dog balloon pink.png')" alt="Dog balloon pink">
-    <img src="Dog balloon red.png" class="thumb-btn" onclick="addSticker('Dog balloon red.png')" alt="Dog balloon red">
-    <img src="Dog balloon yellow.png" class="thumb-btn" onclick="addSticker('Dog balloon yellow.png')" alt="Dog balloon yellow">
-    
-    <img src="Flower blue.png" class="thumb-btn" onclick="addSticker('Flower blue.png')" alt="Flower blue">
-    <img src="Flower orange.png" class="thumb-btn" onclick="addSticker('Flower orange.png')" alt="Flower orange">
-    <img src="Flower pink.png" class="thumb-btn" onclick="addSticker('Flower pink.png')" alt="Flower pink">
-    <img src="Flower purple.png" class="thumb-btn" onclick="addSticker('Flower purple.png')" alt="Flower purple">
-    
-    <img src="heart ballon orange.png" class="thumb-btn" onclick="addSticker('heart ballon orange.png')" alt="heart ballon orange">
-    <img src="heart balloon blue.png" class="thumb-btn" onclick="addSticker('heart balloon blue.png')" alt="heart balloon blue">
-    <img src="heart balloon pink.png" class="thumb-btn" onclick="addSticker('heart balloon pink.png')" alt="heart balloon pink">
-    <img src="heart balloon purple.png" class="thumb-btn" onclick="addSticker('heart balloon purple.png')" alt="heart balloon purple">
-    <img src="heart balloon red.png" class="thumb-btn" onclick="addSticker('heart balloon red.png')" alt="heart balloon red">
-    <img src="heart balloon yellow.png" class="thumb-btn" onclick="addSticker('heart balloon yellow.png')" alt="heart balloon yellow">
-                    </div>
+                            <img src="stickers/festival/Bunting1.png" class="thumb-btn"
+                                onclick="addSticker('stickers/festival/Bunting1.png')" alt="Bunting1">
+                            <img src="stickers/festival/Bunting2.png" class="thumb-btn"
+                                onclick="addSticker('stickers/festival/Bunting2.png')" alt="Bunting2">
+
+                            <img src="stickers/festival/Butterflybluepink.png" class="thumb-btn"
+                                onclick="addSticker('stickers/festival/Butterflybluepink.png')" alt="Butterflybluepink">
+                            <img src="stickers/festival/Butterflygreenyellow.png" class="thumb-btn"
+                                onclick="addSticker('stickers/festival/Butterflygreenyellow.png')"
+                                alt="Butterflygreenyellow">
+                            <img src="stickers/festival/Butterflyorangeblue.png" class="thumb-btn"
+                                onclick="addSticker('stickers/festival/Butterflyorangeblue.png')"
+                                alt="Butterflyorangeblue">
+                            <img src="stickers/festival/Butterflyorangeyellow.png" class="thumb-btn"
+                                onclick="addSticker('stickers/festival/Butterflyorangeyellow.png')"
+                                alt="Butterflyorangeyellow">
+                            <img src="stickers/festival/Butterflypinkpurple.png" class="thumb-btn"
+                                onclick="addSticker('stickers/festival/Butterflypinkpurple.png')"
+                                alt="Butterflypinkpurple">
+                            <img src="stickers/festival/Butterflypinkyellow.png" class="thumb-btn"
+                                onclick="addSticker('stickers/festival/Butterflypinkyellow.png')"
+                                alt="Butterflypinkyellow">
+
+                            <img src="stickers/festival/Dog balloon blue.png" class="thumb-btn"
+                                onclick="addSticker('stickers/festival/Dog balloon blue.png')" alt="Dog balloon blue">
+                            <img src="stickers/festival/Dog balloon green.png" class="thumb-btn"
+                                onclick="addSticker('stickers/festival/Dog balloon green.png')" alt="Dog balloon green">
+                            <img src="stickers/festival/Dog balloon orange.png" class="thumb-btn"
+                                onclick="addSticker('stickers/festival/Dog balloon orange.png')"
+                                alt="Dog balloon orange">
+                            <img src="stickers/festival/Dog balloon pink.png" class="thumb-btn"
+                                onclick="addSticker('stickers/festival/Dog balloon pink.png')" alt="Dog balloon pink">
+                            <img src="stickers/festival/Dog balloon red.png" class="thumb-btn"
+                                onclick="addSticker('stickers/festival/Dog balloon red.png')" alt="Dog balloon red">
+                            <img src="stickers/festival/Dog balloon yellow.png" class="thumb-btn"
+                                onclick="addSticker('stickers/festival/Dog balloon yellow.png')"
+                                alt="Dog balloon yellow">
+
+                            <img src="stickers/festival/Flower blue.png" class="thumb-btn"
+                                onclick="addSticker('stickers/festival/Flower blue.png')" alt="Flower blue">
+                            <img src="stickers/festival/Flower orange.png" class="thumb-btn"
+                                onclick="addSticker('stickers/festival/Flower orange.png')" alt="Flower orange">
+                            <img src="stickers/festival/Flower pink.png" class="thumb-btn"
+                                onclick="addSticker('stickers/festival/Flower pink.png')" alt="Flower pink">
+                            <img src="stickers/festival/Flower purple.png" class="thumb-btn"
+                                onclick="addSticker('stickers/festival/Flower purple.png')" alt="Flower purple">
+
+                            <img src="stickers/festival/heart ballon orange.png" class="thumb-btn"
+                                onclick="addSticker('stickers/festival/heart ballon orange.png')"
+                                alt="heart ballon orange">
+                            <img src="stickers/festival/heart balloon blue.png" class="thumb-btn"
+                                onclick="addSticker('stickers/festival/heart balloon blue.png')"
+                                alt="heart balloon blue">
+                            <img src="stickers/festival/heart balloon pink.png" class="thumb-btn"
+                                onclick="addSticker('stickers/festival/heart balloon pink.png')"
+                                alt="heart balloon pink">
+                            <img src="stickers/festival/heart balloon purple.png" class="thumb-btn"
+                                onclick="addSticker('stickers/festival/heart balloon purple.png')"
+                                alt="heart balloon purple">
+                            <img src="stickers/festival/heart balloon red.png" class="thumb-btn"
+                                onclick="addSticker('stickers/festival/heart balloon red.png')" alt="heart balloon red">
+                            <img src="stickers/festival/heart balloon yellow.png" class="thumb-btn"
+                                onclick="addSticker('stickers/festival/heart balloon yellow.png')"
+                                alt="heart balloon yellow">
+                        </div>
                     </div>
 
                     <div id="cat-3" class="sticker-category">
                         <div class="frame-thumbnails">
-    <img src="Duck.png" class="thumb-btn" onclick="addSticker('Duck.png')" alt="Duck">
-    <img src="Duckboy.png" class="thumb-btn" onclick="addSticker('Duckboy.png')" alt="Duckboy">
-    <img src="Duckgirl.png" class="thumb-btn" onclick="addSticker('Duckgirl.png')" alt="Duckgirl">
-    <img src="Ducktaibangmod.png" class="thumb-btn" onclick="addSticker('Ducktaibangmod.png')" alt="Ducktaibangmod">
-    <img src="Ducktaicmm.png" class="thumb-btn" onclick="addSticker('Ducktaicmm.png')" alt="Ducktaicmm">
-    <img src="Ducktaikaru.png" class="thumb-btn" onclick="addSticker('Ducktaikaru.png')" alt="Ducktaikaru">
-    <img src="ilovecmm.png" class="thumb-btn" onclick="addSticker('ilovecmm.png')" alt="ilovecmm">
-                    </div>
+                            <img src="stickers/cmm/Duck.png" class="thumb-btn"
+                                onclick="addSticker('stickers/cmm/Duck.png')" alt="Duck">
+                            <img src="stickers/cmm/Duckboy.png" class="thumb-btn"
+                                onclick="addSticker('stickers/cmm/Duckboy.png')" alt="Duckboy">
+                            <img src="stickers/cmm/Duckgirl.png" class="thumb-btn"
+                                onclick="addSticker('stickers/cmm/Duckgirl.png')" alt="Duckgirl">
+                            <img src="stickers/cmm/Ducktaibangmod.png" class="thumb-btn"
+                                onclick="addSticker('stickers/cmm/Ducktaibangmod.png')" alt="Ducktaibangmod">
+                            <img src="stickers/cmm/Ducktaicmm.png" class="thumb-btn"
+                                onclick="addSticker('stickers/cmm/Ducktaicmm.png')" alt="Ducktaicmm">
+                            <img src="stickers/cmm/Ducktaikaru.png" class="thumb-btn"
+                                onclick="addSticker('stickers/cmm/Ducktaikaru.png')" alt="Ducktaikaru">
+                            <img src="stickers/cmm/ilovecmm.png" class="thumb-btn"
+                                onclick="addSticker('stickers/cmm/ilovecmm.png')" alt="ilovecmm">
+                        </div>
                     </div>
 
                     <div id="cat-4" class="sticker-category">
                         <div class="frame-thumbnails">
-    <img src="Cadypinkpurple.PNG" class="thumb-btn" onclick="addSticker('Cadypinkpurple.PNG')" alt="Cadypinkpurple">
-    <img src="Candygreenblue.PNG" class="thumb-btn" onclick="addSticker('Candygreenblue.PNG')" alt="Candygreenblue">
-    <img src="Candylinepinkblue.PNG" class="thumb-btn" onclick="addSticker('Candylinepinkblue.PNG')" alt="Candylinepinkblue">
-    <img src="Candypinkblue.PNG" class="thumb-btn" onclick="addSticker('Candypinkblue.PNG')" alt="Candypinkblue">
-    <img src="Candyyellowpink.PNG" class="thumb-btn" onclick="addSticker('Candyyellowpink.PNG')" alt="Candyyellowpink">
-    <img src="Icecream1.PNG" class="thumb-btn" onclick="addSticker('Icecream1.PNG')" alt="Icecream1">
-    <img src="Icecream2.PNG" class="thumb-btn" onclick="addSticker('Icecream2.PNG')" alt="Icecream2">
-</div>
+                            <img src="stickers/sweets/Cadypinkpurple.PNG" class="thumb-btn"
+                                onclick="addSticker('stickers/sweets/Cadypinkpurple.PNG')" alt="Cadypinkpurple">
+                            <img src="stickers/sweets/Candygreenblue.PNG" class="thumb-btn"
+                                onclick="addSticker('stickers/sweets/Candygreenblue.PNG')" alt="Candygreenblue">
+                            <img src="stickers/sweets/Candylinepinkblue.PNG" class="thumb-btn"
+                                onclick="addSticker('stickers/sweets/Candylinepinkblue.PNG')" alt="Candylinepinkblue">
+                            <img src="stickers/sweets/Candypinkblue.PNG" class="thumb-btn"
+                                onclick="addSticker('stickers/sweets/Candypinkblue.PNG')" alt="Candypinkblue">
+                            <img src="stickers/sweets/Candyyellowpink.PNG" class="thumb-btn"
+                                onclick="addSticker('stickers/sweets/Candyyellowpink.PNG')" alt="Candyyellowpink">
+                            <img src="stickers/sweets/Icecream1.PNG" class="thumb-btn"
+                                onclick="addSticker('stickers/sweets/Icecream1.PNG')" alt="Icecream1">
+                            <img src="stickers/sweets/Icecream2.PNG" class="thumb-btn"
+                                onclick="addSticker('stickers/sweets/Icecream2.PNG')" alt="Icecream2">
+                        </div>
                     </div>
 
-                    <button class="btn-remove" onclick="deleteSelected()" style="margin-top: 15px;">🗑️ Delete selected</button>
+                    <button class="btn-remove" onclick="deleteSelected()" style="margin-top: 15px;">🗑️ Delete
+                        selected</button>
                 </div>
-                
+
                 <div class="tool-block" style="background-color: transparent; border: none; padding: 0;">
                     <button class="btn-success" id="download-btn">💾 Save image</button>
+                    <button class="btn-qr-get" id="qr-btn" onclick="uploadToDrive()">📱 Get QR Code</button>
                     <button class="btn-retake" id="retake-btn">🔄 Retake image</button>
                 </div>
             </div>
 
+        </div>
+    </div>
+
+    <!-- QR Modal HTML -->
+    <div id="qr-modal">
+        <div class="qr-card">
+            <h2 id="modal-title">Ready!</h2>
+            <p id="modal-desc">Scan to see your photo</p>
+
+            <div id="qr-display">
+                <div id="qr-status-area">
+                    <div class="loading-spinner"></div>
+                    <span style="color: #666;">Uploading to Drive...</span>
+                </div>
+            </div>
+
+            <div id="qr-link-area" style="display: none;">
+                <button class="btn-remove" onclick="closeQRModal()">Close</button>
+            </div>
         </div>
     </div>
 
@@ -398,9 +712,30 @@
         const countdownDisplay = document.getElementById('countdown-display');
         const flashEffect = document.getElementById('flash-effect');
 
-        let canvas; 
-        let stream; 
-        let capturedPhotos = []; 
+        let canvas;
+        let stream;
+        let capturedPhotos = [];
+        let mediaRecorder;
+        let videoChunks = [];
+        let videoBlob = null;
+
+        // 🎥 เตรียมหน้าจอสำหรับอัด Stop Motion (สร้างครั้งเดียว)
+        const stopMotionCanvas = document.createElement('canvas');
+        stopMotionCanvas.id = 'sm-canvas';
+        stopMotionCanvas.width = 360;
+        stopMotionCanvas.height = 640;
+        stopMotionCanvas.style.position = 'fixed';
+        stopMotionCanvas.style.bottom = '10px';
+        stopMotionCanvas.style.right = '10px';
+        stopMotionCanvas.style.border = '2px solid #ff69b4';
+        stopMotionCanvas.style.zIndex = '10000';
+        stopMotionCanvas.style.borderRadius = '10px';
+        stopMotionCanvas.style.background = '#333';
+        stopMotionCanvas.style.display = 'none'; // ซ่อนไว้ก่อน จะโชว์ตอนถ่าย
+        document.body.appendChild(stopMotionCanvas);
+        const smCtx = stopMotionCanvas.getContext('2d');
+        const smStream = stopMotionCanvas.captureStream(10);
+
 
         // ====================================================
         // 🚨 ตั้งค่าระยะห่างขอบและช่องไฟของรูปถ่าย (Layout) 🚨
@@ -415,9 +750,9 @@
         const gap = 15;              // ช่องว่างระหว่างรูป
 
         // คำนวณขนาดภาพถ่ายอัตโนมัติ
-        const photoWidth = canvasWidth - (padLeftRight * 2); 
-        const totalGap = gap * (totalPhotos - 1); 
-        const photoHeight = (canvasHeight - padTop - padBottom - totalGap) / totalPhotos; 
+        const photoWidth = canvasWidth - (padLeftRight * 2);
+        const totalGap = gap * (totalPhotos - 1);
+        const photoHeight = (canvasHeight - padTop - padBottom - totalGap) / totalPhotos;
         // ====================================================
 
         // --- 1. เปิดกล้อง ---
@@ -427,14 +762,99 @@
 
         // --- 2. ฟังก์ชันเริ่มถ่ายรูป ---
         snapBtn.addEventListener('click', () => {
-            capturedPhotos = []; 
+            capturedPhotos = [];
+            videoChunks = []; // ล้างข้อมูลวิดีโอเก่า
             snapBtn.disabled = true;
-            startCountdownForPhoto(1); 
+
+            // 🎥 เริ่มบันทึกวิดีโอ
+            startVideoRecording();
+
+            startCountdownForPhoto(1);
         });
+
+        function startVideoRecording() {
+            try {
+                if (!stream) return;
+                videoChunks = [];
+                videoBlob = null;
+                stopMotionCanvas.style.display = 'block'; // โชว์มอนิเตอร์
+
+                const frameImg = new Image();
+                if (currentFrameSrc) frameImg.src = currentFrameSrc;
+
+                // ตรวจสอบ MimeType
+                let mimeType = 'video/webm;codecs=vp8';
+                if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm';
+
+                try {
+                    mediaRecorder = new MediaRecorder(smStream, {
+                        mimeType: mimeType,
+                        videoBitsPerSecond: 1000000
+                    });
+                } catch (e) {
+                    mediaRecorder = new MediaRecorder(smStream);
+                }
+
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data && e.data.size > 0) videoChunks.push(e.data);
+                };
+                mediaRecorder.onstop = () => {
+                    if (videoChunks.length > 0) {
+                        videoBlob = new Blob(videoChunks, { type: 'video/webm' });
+                        console.log("Video Ready!");
+                    }
+                };
+
+                mediaRecorder.start(500);
+
+                const smInterval = setInterval(() => {
+                    if (!stream || cameraSectionWrapper.style.display === 'none') {
+                        clearInterval(smInterval);
+                        return;
+                    }
+
+                    // วาดพื้นหลัง
+                    smCtx.fillStyle = "#000000";
+                    smCtx.fillRect(0, 0, stopMotionCanvas.width, stopMotionCanvas.height);
+
+                    // วาดกล้อง
+                    smCtx.save();
+                    smCtx.translate(stopMotionCanvas.width, 0);
+                    smCtx.scale(-1, 1);
+                    smCtx.drawImage(video, 0, 0, stopMotionCanvas.width, stopMotionCanvas.height);
+                    smCtx.restore();
+
+                    // วาดเฟรม
+                    if (currentFrameSrc && frameImg.complete) {
+                        smCtx.drawImage(frameImg, 0, 0, stopMotionCanvas.width, stopMotionCanvas.height);
+                    }
+
+                    // วาดตัวหนังสือ Debug (ถ้าเห็นแสดงว่าวาดติด)
+                    smCtx.fillStyle = "lime";
+                    smCtx.font = "20px Arial";
+                    smCtx.fillText("REC: " + new Date().getSeconds(), 10, 30);
+
+                }, 500);
+
+                window.smIntervalId = smInterval;
+            } catch (err) {
+                console.error("Recording error:", err);
+            }
+        }
+
+        function stopVideoRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            }
+            if (window.smIntervalId) {
+                clearInterval(window.smIntervalId);
+            }
+            stopMotionCanvas.style.display = 'none';
+        }
 
         // --- 3. ฟังก์ชันนับถอยหลัง ---
         function startCountdownForPhoto(photoNumber) {
-            let count = 5; 
+            let count = 5;
             countdownDisplay.style.display = 'block';
             countdownDisplay.innerText = count;
             snapBtn.innerText = `📸 Taking Photo ${photoNumber} / ${totalPhotos}...`;
@@ -446,14 +866,21 @@
                 } else if (count === 0) {
                     countdownDisplay.innerText = "Cheese! 📸";
                 } else {
-                    clearInterval(timer); 
-                    countdownDisplay.style.display = 'none'; 
-                    captureSinglePhoto(); 
+                    clearInterval(timer);
+                    countdownDisplay.style.display = 'none';
 
-                    if (capturedPhotos.length < totalPhotos) {
-                        setTimeout(() => { startCountdownForPhoto(capturedPhotos.length + 1); }, 1000); 
-                    } else {
-                        goToEditor(); 
+                    try {
+                        captureSinglePhoto();
+
+                        if (capturedPhotos.length < totalPhotos) {
+                            setTimeout(() => { startCountdownForPhoto(capturedPhotos.length + 1); }, 1000);
+                        } else {
+                            stopVideoRecording();
+                            goToEditor();
+                        }
+                    } catch (e) {
+                        console.error("Capture Error:", e);
+                        goToEditor(); // พยายามไปต่อแม้จะมี Error
                     }
                 }
             }, 1000);
@@ -461,25 +888,25 @@
 
         // --- 4. ฟังก์ชันตัดภาพ (Crop) ให้พอดีกับกรอบเป๊ะๆ ---
         function captureSinglePhoto() {
-            if(flashEffect) {
+            if (flashEffect) {
                 flashEffect.classList.add('flash-animate');
                 setTimeout(() => flashEffect.classList.remove('flash-animate'), 500);
             }
-            
+
             const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = photoWidth; 
-            tempCanvas.height = photoHeight; 
+            tempCanvas.width = photoWidth;
+            tempCanvas.height = photoHeight;
             const tempCtx = tempCanvas.getContext('2d');
-            
+
             // สลับเป็นกระจก
             tempCtx.translate(tempCanvas.width, 0);
             tempCtx.scale(-1, 1);
-            
+
             // คำนวณจุดตัดของภาพ
-            const targetRatio = photoWidth / photoHeight; 
+            const targetRatio = photoWidth / photoHeight;
             const videoRatio = video.videoWidth / video.videoHeight;
             let sWidth, sHeight, sx, sy;
-            
+
             if (targetRatio > videoRatio) {
                 sWidth = video.videoWidth;
                 sHeight = sWidth / targetRatio;
@@ -491,42 +918,47 @@
                 sy = 0;
                 sx = (video.videoWidth - sWidth) / 2;
             }
-            
+
             tempCtx.drawImage(video, sx, sy, sWidth, sHeight, 0, 0, photoWidth, photoHeight);
             capturedPhotos.push(tempCanvas.toDataURL('image/png'));
         }
 
         // --- 5. ฟังก์ชันจัดเรียงรูปภาพลงหน้าตกแต่ง ---
         function goToEditor() {
+            // ปิดสตรีมกล้องเพื่อคืนทรัพยากรเครื่อง
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+
             cameraSectionWrapper.style.display = 'none';
-            editorLayout.style.display = 'flex'; 
+            editorLayout.style.display = 'flex';
 
             if (!canvas) {
                 canvas = new fabric.Canvas('fabric-canvas', {
                     width: canvasWidth,
                     height: canvasHeight,
                     backgroundColor: '#ffffff', // สีขอบพื้นหลัง (แก้เป็นสีอื่นได้)
-                    preserveObjectStacking: true 
+                    preserveObjectStacking: true
                 });
             } else {
                 canvas.clear();
                 canvas.backgroundColor = '#ffffff';
-                currentFrameObj = null; 
+                currentFrameObj = null;
             }
 
             // จัดเรียงรูปภาพตามพิกัดที่คำนวณไว้
             let loadedImages = 0;
             capturedPhotos.forEach((photoDataUrl, index) => {
-                fabric.Image.fromURL(photoDataUrl, function(img) {
-                    img.set({ 
-                        left: padLeftRight, 
-                        top: padTop + (index * (photoHeight + gap)), 
-                        selectable: false, evented: false 
+                fabric.Image.fromURL(photoDataUrl, function (img) {
+                    img.set({
+                        left: padLeftRight,
+                        top: padTop + (index * (photoHeight + gap)),
+                        selectable: false, evented: false
                     });
-                    
+
                     canvas.add(img);
-                    img.sendToBack(); 
-                    
+                    img.sendToBack();
+
                     loadedImages++;
                     if (loadedImages === totalPhotos) canvas.renderAll();
                 });
@@ -536,28 +968,27 @@
             snapBtn.innerText = "📷 เริ่มถ่ายรูป (3 ช็อต)";
         }
 
-        // --- 6. ฟังก์ชันจัดการกรอบรูป (อยู่ชั้นกลาง) ---
-        let currentFrameObj = null; 
+        let currentFrameObj = null;
         function addFrame(url) {
-            fabric.Image.fromURL(url, function(img) {
+            fabric.Image.fromURL(url, function (img) {
                 if (!img) { alert("หาไฟล์รูปกรอบไม่เจอครับ!"); return; }
                 if (currentFrameObj) canvas.remove(currentFrameObj);
 
                 img.set({
                     left: 0, top: 0,
-                    scaleX: canvas.width / img.width, 
+                    scaleX: canvas.width / img.width,
                     scaleY: canvas.height / img.height,
-                    selectable: false, evented: false 
+                    selectable: false, evented: false
                 });
-                
+
                 canvas.add(img);
-                img.moveTo(totalPhotos); // ดันไปไว้เหนือรูปถ่าย
+                img.moveTo(totalPhotos);
                 currentFrameObj = img;
                 canvas.renderAll();
             }, { crossOrigin: 'anonymous' });
         }
 
-        function removeFrame() { 
+        function removeFrame() {
             if (currentFrameObj) {
                 canvas.remove(currentFrameObj);
                 currentFrameObj = null;
@@ -565,31 +996,28 @@
             }
         }
 
-        // --- 7. ฟังก์ชันจัดการสติกเกอร์ (อยู่บนสุด) ---
-function addSticker(url) {
-    fabric.Image.fromURL(url, function(img) {
-        img.set({
-            // ❌ ลบ left: 200, และ top: canvasHeight - 120 ออก
-            scaleX: 0.25, scaleY: 0.25, // ยังคงย่อขนาดสติกเกอร์ลง
-            transparentCorners: false, cornerColor: '#dbc7eb', borderColor: '#ffffff', cornerSize: 12, padding: 5, cornerStyle: 'circle'
-        });
-        canvas.add(img);
-        img.bringToFront(); // ยังคงอยู่บนสุด
-        img.center(); // 🚨 NEW: จับสติกเกอร์มาวางตรงกลางภาพทันที
-        canvas.setActiveObject(img); // ยังคงเลือกให้ผู้ใช้
-    }, { crossOrigin: 'anonymous' });
-}
-
-        function deleteSelected() { 
-            const activeObject = canvas.getActiveObject(); 
-            if (activeObject) canvas.remove(activeObject); 
+        function addSticker(url) {
+            fabric.Image.fromURL(url, function (img) {
+                img.set({
+                    scaleX: 0.25, scaleY: 0.25,
+                    transparentCorners: false, cornerColor: '#dbc7eb', borderColor: '#ffffff', cornerSize: 12, padding: 5, cornerStyle: 'circle'
+                });
+                canvas.add(img);
+                img.bringToFront();
+                img.center();
+                canvas.setActiveObject(img);
+            }, { crossOrigin: 'anonymous' });
         }
 
-        window.addEventListener('keydown', (e) => { 
-            if (e.key === 'Delete' || e.key === 'Backspace') deleteSelected(); 
+        function deleteSelected() {
+            const activeObject = canvas.getActiveObject();
+            if (activeObject) canvas.remove(activeObject);
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Delete' || e.key === 'Backspace') deleteSelected();
         });
 
-        // --- 8. ฟังก์ชันสลับหมวดหมู่สติกเกอร์ (Tabs) ---
         function showCategory(categoryId, btnElement) {
             const categories = document.querySelectorAll('.sticker-category');
             categories.forEach(cat => cat.style.display = 'none');
@@ -601,12 +1029,10 @@ function addSticker(url) {
             btnElement.classList.add('active');
         }
 
-        // --- 9. ฟังก์ชันดาวน์โหลด (ความละเอียด 1080x1920) ---
         document.getElementById('download-btn').addEventListener('click', () => {
-            canvas.discardActiveObject(); 
+            canvas.discardActiveObject();
             canvas.renderAll();
-            
-            // คูณ 2 จาก 540x960 จะได้ภาพเซฟขนาด 1080x1920
+
             const dataURL = canvas.toDataURL({ format: 'png', quality: 1, multiplier: 2 });
             const link = document.createElement('a');
             link.download = 'my-korean-photobooth.png';
@@ -614,11 +1040,98 @@ function addSticker(url) {
             link.click();
         });
 
-        // --- 10. ถ่ายใหม่ ---
         document.getElementById('retake-btn').addEventListener('click', () => {
             editorLayout.style.display = 'none';
             cameraSectionWrapper.style.display = 'block';
         });
+
+        const SCRIPT_URL = "REPLACE_WITH_YOUR_GOOGLE_SCRIPT_URL";
+
+        async function uploadToDrive() {
+            const modal = document.getElementById('qr-modal');
+            const statusArea = document.getElementById('qr-status-area');
+            const qrDisplay = document.getElementById('qr-display');
+            const linkArea = document.getElementById('qr-link-area');
+            const title = document.getElementById('modal-title');
+
+            modal.style.display = 'flex';
+            if (statusArea) statusArea.style.display = 'block';
+            linkArea.style.display = 'none';
+            title.innerText = "Wait a second...";
+            qrDisplay.innerHTML = '<div id="qr-status-area"><div class="loading-spinner"></div><span style="color: #666;">Finalizing video and uploading...</span></div>';
+
+            try {
+                // รอสักครู่เพื่อให้ไฟล์วิดีโอพร้อม (เผื่อกรณีคลิกเร็ว)
+                if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                    stopVideoRecording();
+                }
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                canvas.discardActiveObject();
+                canvas.renderAll();
+                const photoDataURL = canvas.toDataURL({ format: 'png', quality: 0.8, multiplier: 2 });
+
+                // 💾 เพิ่มระบบ Backup ลงเครื่องสำรองไว้ทันที
+                const backupLink = document.createElement('a');
+                backupLink.href = photoDataURL;
+                backupLink.download = `booth_backup_${new Date().getTime()}.png`;
+                backupLink.click();
+
+                // 2. เตรียมวิดีโอ
+                let videoBase64 = "";
+                if (videoBlob) {
+                    const reader = new FileReader();
+                    videoBase64 = await new Promise(resolve => {
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(videoBlob);
+                    });
+                }
+
+                // 3. ส่งไปที่ Google Apps Script
+                const payload = JSON.stringify({
+                    photoBase64: photoDataURL,
+                    videoBase64: videoBase64,
+                    sessionName: 'Booth_' + new Date().toISOString().replace(/[:.]/g, '-'),
+                    photoName: 'final_photo.png',
+                    videoName: 'behind_the_scenes.webm'
+                });
+
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    body: payload
+                });
+
+                if (!response.ok) throw new Error("Network response was not ok");
+
+                const result = await response.json();
+
+                if (result.status === "success") {
+                    const folderUrl = result.folderUrl;
+                    const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(folderUrl)}`;
+
+                    title.innerText = "Success! ✨";
+                    qrDisplay.innerHTML = `
+                        <img src="${qrImageUrl}" style="width:180px; height:180px; border:5px solid white; border-radius:10px;">
+                        <p style="color: #444; font-size: 14px; margin-top:10px;">สแกนเพื่อเข้าโฟลเดอร์รูปและวิดีโอของคุณ</p>
+                    `;
+                    linkArea.style.display = 'block';
+                } else {
+                    throw new Error(result.message || "Unknown error");
+                }
+
+            } catch (error) {
+                console.error("Upload error detail:", error);
+                title.innerText = "Error ❌";
+                qrDisplay.innerHTML = `<span style="color: red; font-size:14px;">Upload failed: ${error.message}<br><small>กรุณาลองรีเฟรชหน้าเว็บและถ่ายใหม่อีกครั้งครับ</small></span>`;
+                linkArea.style.display = 'block';
+            }
+        }
+
+        function closeQRModal() {
+            document.getElementById('qr-modal').style.display = 'none';
+        }
     </script>
 </body>
+
 </html>

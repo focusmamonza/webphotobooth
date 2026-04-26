@@ -122,6 +122,8 @@ body {
     gap: 20px;
     width: 320px;
     text-align: left;
+    height: 850px;       /* ล็อคความสูงแท่ง Sidebar ให้เท่ากัน */
+    justify-content: space-between; /* ดันปุ่มล่างสุดไปไว้ที่ก้นเสมอ */
 }
 
 .tool-block {
@@ -129,6 +131,8 @@ body {
     border: 2px solid #eee;
     border-radius: 15px;
     padding: 20px;
+    /* ยืดหยุ่นได้แต่ไม่ดันปุ่ม */
+    overflow-y: auto; 
 }
 
 .tool-block h3 {
@@ -143,17 +147,12 @@ body {
 
 .frame-thumbnails {
     display: grid;
+    grid-template-columns: repeat(4, 1fr);
     gap: 8px;
-    justify-items: center;
+    margin-top: 10px;
 }
 
-.tool-block > .frame-thumbnails {
-    grid-template-columns: repeat(4, 1fr);
-}
-
-.sticker-category .frame-thumbnails {
-    grid-template-columns: repeat(4, 1fr);
-}
+/* ไม่ต้องมี grid-template-columns ซ้ำซ้อน */
 
 .thumb-btn {
     width: 100%;
@@ -237,7 +236,10 @@ button:disabled {
 
 .sticker-category {
     display: none;
-    min-height: 250px; /* ล็อคความสูงไว้ไม่ให้ BG ขยับ */
+    max-height: 500px; /* จำกัดไว้ไม่ให้ยาวเกิน Sidebar */
+    overflow-y: auto;  
+    padding: 5px;
+    margin-bottom: 10px;
 }
 
 #qr-modal {

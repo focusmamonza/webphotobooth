@@ -162,8 +162,11 @@ function showCategory(categoryId, btnElement) {
     categories.forEach(cat => cat.style.display = 'none');
     const buttons = document.querySelectorAll('.cat-btn');
     buttons.forEach(btn => btn.classList.remove('active'));
-    document.getElementById(categoryId).style.display = 'block';
-    btnElement.classList.add('active');
+    const target = document.getElementById(categoryId);
+    if (target) {
+        target.style.display = 'block';
+        btnElement.classList.add('active');
+    }
 }
 
 document.getElementById('download-btn').addEventListener('click', () => {

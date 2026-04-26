@@ -175,7 +175,7 @@ document.getElementById('download-btn').addEventListener('click', () => {
 
 document.getElementById('retake-btn').addEventListener('click', () => { location.reload(); });
 
-const SCRIPT_URL = 'REPLACE_WITH_YOUR_GOOGLE_SCRIPT_URL';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw4F0bouElg00hvU3tvvsKZcY6xfx60rx-h8JoLNPc9tynYHALTI8mkCgVFbUx20IYJ/exec';
 
 async function uploadToDrive() {
     const modal = document.getElementById('qr-modal');

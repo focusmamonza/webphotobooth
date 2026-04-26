@@ -1,7 +1,7 @@
 /* ================= CSS ================= */
 body {
     font-size: 24px;
-    font-family: 'glass antiqua', sans-serif;
+    font-family: 'Glass Antiqua', sans-serif;
     background-image: url('ui/webbgstar-100.jpg');
     background-size: cover;
     background-repeat: no-repeat;
@@ -134,7 +134,8 @@ body {
 .tool-block h3 {
     margin-top: 0;
     margin-bottom: 15px;
-    font-size: 18px;
+    font-size: 20px;
+    font-family: 'Glass Antiqua', sans-serif;
     color: #333;
     border-bottom: 2px solid #ddd;
     padding-bottom: 10px;
@@ -179,7 +180,8 @@ body {
 
 button {
     padding: 12px;
-    font-size: 16px;
+    font-size: 18px;
+    font-family: 'Glass Antiqua', sans-serif;
     font-weight: bold;
     border: none;
     border-radius: 10px;
@@ -235,7 +237,7 @@ button:disabled {
 
 .sticker-category {
     display: none;
-    min-height: 80px;
+    min-height: 250px; /* ล็อคความสูงไว้ไม่ให้ BG ขยับ */
 }
 
 #qr-modal {
